@@ -24,7 +24,8 @@ class Agent():
         
         self.x = self.grid.size // 2
         self.y = self.grid.size // 2
-        self.timeStartEnd = time.time()
+        self.timeStart = time.time()
+        self.trialTime = -1
     
     def move(self, x, y): # move up, down, left, right randomly
         self.grid.grid[self.y][self.x] = None
@@ -33,7 +34,7 @@ class Agent():
 
         if isinstance(self.grid.grid[self.y][self.x], Fire):
             self.dead = True
-            self.timeStartEnd = time.time() - self.timeStartEnd
+            self.trialTime = time.time() - self.timeStart
         elif isinstance(self.grid.grid[self.y][self.x], Cheese):
             self.cheeseEaten += 1
             print("yum")
@@ -53,7 +54,6 @@ class Grid():
         self.grid = []
         self.size = size
 
-    
     def printGrid(self):
         for i in range(self.size):
             row = ""

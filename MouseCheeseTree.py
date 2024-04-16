@@ -46,9 +46,11 @@ class Node(py_trees.behaviour.Behaviour):
         self.blackboard = blackboard
         self.parent = None  # Parent node
     def checkTime(self):
+        print("get agent")
         agent = self.blackboard.get("agent")
-        if not agent.dead and time.time() - agent.timeStartEnd > time_trial:
-            agent.timeStartEnd = time.time() - agent.timeStartEnd
+        timePassed = time.time() - agent.timeStart
+        if not agent.dead and timePassed > time_trial:
+            agent.trialTime = timePassed
             raise Exception("Time's up")
         elif agent.dead:
             raise Exception("Agent dead")
@@ -155,6 +157,7 @@ class BehaviorTree():
     # create 2d grid of random Food() and None of size 10x10
     # blackboard variable contains grid, agent
     def __init__(self, blackboard, root):
+        assert blackboard is not None
         self.blackboard = blackboard
         self.tree = self.make_bt(root)
         

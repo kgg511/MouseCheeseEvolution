@@ -23,6 +23,7 @@ from circular_array import CircularArray
 class TreeGenerator:
     def __init__(self, c_list: CircularArray):
         self.array = c_list
+        self.representationString = None
 
     # Grammar rules
     def BT(self): 
@@ -96,7 +97,9 @@ class TreeGenerator:
 
     # Generate a string using the grammar
     def generate_tree(self, bb):
-        treeString = self.BT()
-        print(treeString)
-        return eval(treeString)
+        if self.representationString is None:
+            self.representationString = self.BT()
+        
+        print(self.representationString)
+        return eval(self.representationString)
 

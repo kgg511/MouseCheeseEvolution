@@ -3,8 +3,29 @@
         {
             "score": 0,
             "max_score": 0,
+            "name": "test_circular_array.py::test_get_element",
+            "output": "\n",
+            "visibility": "visible"
+        },
+        {
+            "score": 0,
+            "max_score": 0,
+            "name": "test_circular_array.py::test_convert_to_list",
+            "output": "\n",
+            "visibility": "visible"
+        },
+        {
+            "score": 0,
+            "max_score": 0,
+            "name": "test_circular_array.py::test_index",
+            "output": "\n",
+            "visibility": "visible"
+        },
+        {
+            "score": 0,
+            "max_score": 0,
             "name": "test_circular_array.py::test_making_tree",
-            "output": "BT\nfetching  7\nSequence\nfetching  4\nBT\nfetching  3\nSequence\nfetching  9\nfetching  4\nBT\nfetching  1\nSequence\nfetching  3\nfetching  8\nBT\nfetching  2\nSelector\nfetching  3\nfetching  7\nfetching  5\nfetching  8\nBT\nfetching  2\nSelector\nfetching  8\nBT\nfetching  3\nSequence\nfetching  3\nfetching  7\nfetching  0\nBT\nfetching  6\nSelector\nfetching  8\nBT\nfetching  5\nSequence\nfetching  2\nLeaf\nfetching  6\nDArguments\nfetching  7\nLeaf\nfetching  0\nDArguments\nfetching  4\nLeaf\nfetching  0\nDArguments\nfetching  7\nBT\nfetching  6\nSelector\nfetching  6\nLeaf\nfetching  2\nDArguments\nfetching  2\nLeaf\nfetching  2\nDArguments\nfetching  0\nLeaf\nfetching  3\nDArguments\nfetching  2\nLeaf\nfetching  6\nDArguments\nfetching  3\nBT\nfetching  6\nSelector\nfetching  6\nLeaf\nfetching  5\nDArguments\nfetching  6\nCSequence('Sequence', memory=True, children=[CSequence('Sequence', memory=True, children=[CSequence('Sequence', memory=True, children=[CSelector('Selector', memory=True, children=[CSelector('Selector', memory=True, children=[CSequence('Sequence', memory=True, children=[CSelector('Selector', memory=True, children=[CSequence('Sequence', memory=True, children=[CondCheese('down', bb)])]),CondCheese('left', bb),CondCheese('down', bb)])]),CSelector('Selector', memory=True, children=[Move('up', bb)]),Move('left', bb),Move('up', bb)]),CondCheese('down', bb)]),CSelector('Selector', memory=True, children=[Move('up', bb)])])])\ninitailized w Sequence True [<MouseCheeseTree.CondCheese object at 0x1068bde50>]\ninitailized w Sequence True [<MouseCheeseTree.CSelector object at 0x1068d0490>, <MouseCheeseTree.CondCheese object at 0x105f73d90>, <MouseCheeseTree.CondCheese object at 0x1069ed350>]\ninitailized w Sequence True [<MouseCheeseTree.CSelector object at 0x1069ede10>, <MouseCheeseTree.CondCheese object at 0x1069edf50>]\ninitailized w Sequence True [<MouseCheeseTree.CSequence object at 0x1069ee0d0>, <MouseCheeseTree.CSelector object at 0x1069ee3d0>]\ninitailized w Sequence True [<MouseCheeseTree.CSequence object at 0x1069ee510>]\nWriting /Users/katiegreer/Desktop/research/genetic/behavior_tree_test.dot\nWriting /Users/katiegreer/Desktop/research/genetic/behavior_tree_test.png\nWriting /Users/katiegreer/Desktop/research/genetic/behavior_tree_test.svg\n\n",
+            "output": "CSelector('Selector', memory=True, children=[CondCheese('left', bb)])\nWriting /Users/katiegreer/Desktop/research/genetic/MouseCheeseEvolution/behavior_tree_test.dot\nWriting /Users/katiegreer/Desktop/research/genetic/MouseCheeseEvolution/behavior_tree_test.png\nWriting /Users/katiegreer/Desktop/research/genetic/MouseCheeseEvolution/behavior_tree_test.svg\n\n",
             "visibility": "visible"
         }
     ]

@@ -29,9 +29,7 @@ def test_index(circular_array):
     with pytest.raises(IndexError) as e:
         circular_array.get(15)
 
-# how have not ACTUALLY TESTED USING IT TO MAKE TREE
 import sys
-
 def test_making_tree(): # also a way to test if your circular array has a good nubmer of stuff
     sys.setrecursionlimit(2000)
     bb = py_trees.blackboard.Blackboard()

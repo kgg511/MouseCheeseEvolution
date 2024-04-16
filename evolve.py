@@ -1,4 +1,3 @@
-
 from typing import List, Tuple
 from random import choices, randint, randrange, random
 from collections import namedtuple
@@ -45,11 +44,12 @@ def generate_population(size:int, genome_length: int)-> Population: # originally
 
 def fitness(genome: Genome) -> int:
     genome.run_tree()
+    assert genome.bb is not None
     agent = genome.bb.get("agent") # agent of THIS behavior tree
     print("cheese eaten: ", agent.cheeseEaten)
-    print("time: ", agent.timeStartEnd)
+    print("time: ", agent.trialTime)
     print(len(genome.pArray))
-    value = agent.cheeseEaten + agent.timeStartEnd - (len(genome.pArray) / 1000)
+    value = agent.cheeseEaten + agent.trialTime - (len(genome.pArray) / 1000)
     genome.fitness = value
     print("fitness: ", value)
     time.sleep(2)
