@@ -44,14 +44,15 @@ def delete_files_starting_with(prefix):
     for file in files:
         # Check if the file starts with the specified prefix
         if file.startswith(prefix):
-            try:
-                # Construct the file path
-                file_path = os.path.join(cwd, file)
-                # Remove the file
-                os.remove(file_path)
-                print(f"Deleted file: {file}")
-            except Exception as e:
-                print(f"Error deleting file {file}: {e}")
+            file_path = os.path.join(cwd, file)
+            delete_file(file_path)
+
+def delete_file(filename):
+    try:
+        os.remove(filename)
+        print(f"File '{filename}' deleted successfully.")
+    except OSError as e: # Handle the case where the file doesn't exist or there's a permission error
+        print(f"Error deleting file '{filename}': {e}")
 
 def generate_genome(length: int) -> Genome:
     numbers = [random.randint(0,9) for _ in range(length)] # length of circular array
@@ -81,6 +82,13 @@ def fitness(genome: Genome) -> int:
 # choose two best from population
 def selection_pair(population: Population, fitness_func: FitnessFunc) -> Population:
     the_weights = [fitness_func(genome) for genome in population] # fitness values
+    the_weights = sorted(the_weights, reverse=True) # biggest to smallest
+
+    with open("fitness_values.txt", "a") as f:
+        for weight in the_weights:
+            f.write(str(round(weight, 4)) + ", ")
+        f.write("\n")
+
     if all(weight == 0 for weight in the_weights):
         # If all weights are zero, assign a default weight
         default_weight = 1
@@ -140,8 +148,8 @@ def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
         point1.children[aIndex] = point2.children[bIndex] 
         point2.children[bIndex] = temp
     
-    display.render_dot_tree(a.tree, name="a_cross")
-    display.render_dot_tree(b.tree, name="b_cross")
+    # display.render_dot_tree(a.tree, name="a_cross")
+    # display.render_dot_tree(b.tree, name="b_cross")
     print("DONE CORSSING")
     a.fitness = -1 # tree has been altered so fitness is no longer valid
     b.fitness = -1 # tree has been altered so fitness is no longer valid
@@ -192,6 +200,8 @@ def run_evolution(
     # Set a new recursion limit (e.g., 2000)
     sys.setrecursionlimit(2000)
 
+    delete_file("fitness_values.txt")
+
     population = populate_func() # populate
 
     # run i generations, each time keeping top two, but alsos selecting by weight other genomes
@@ -238,10 +248,10 @@ def run_evolution(
 genome_size = 200
 start = time.time()
 population,generation = run_evolution(
-    populate_func=partial(generate_population, size=5, genome_length=genome_size), #size:int, genome_length: int
+    populate_func=partial(generate_population, size=10, genome_length=genome_size), #size:int, genome_length: int
     fitness_func=fitness,
     fitness_limit=100,
-    generation_limit=15,
+    generation_limit=200,
 )
 # generate_population(size:int, genome_length: int)
 end = time.time()

@@ -10,7 +10,7 @@ from py_trees.common import Status
 from py_trees import logging as log_tree
 from typing import Callable as function
 from copy import deepcopy
-time_trial = 3
+time_trial = 10
 
 class CSequence(py_trees.composites.Sequence):
     def __init__(self, name=None, memory=False, children=None):
