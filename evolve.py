@@ -16,6 +16,7 @@ from TreeSpecific import TreeGenerator
 from copy import deepcopy
 import sys
 import py_trees.display as display
+import os
 
 Population = List[Genome]
 FitnessFunc = Callable[[Genome], int] # how good genome is
@@ -33,6 +34,24 @@ things = [
     Thing('Notepad', 40, 333),
     Thing('Water Bottle', 30, 192),
 ]
+
+def delete_files_starting_with(prefix):
+    # Get the current working directory
+    cwd = os.getcwd()
+    # List all files in the directory
+    files = os.listdir(cwd)
+    # Iterate over the files
+    for file in files:
+        # Check if the file starts with the specified prefix
+        if file.startswith(prefix):
+            try:
+                # Construct the file path
+                file_path = os.path.join(cwd, file)
+                # Remove the file
+                os.remove(file_path)
+                print(f"Deleted file: {file}")
+            except Exception as e:
+                print(f"Error deleting file {file}: {e}")
 
 def generate_genome(length: int) -> Genome:
     numbers = [random.randint(0,9) for _ in range(length)] # length of circular array
@@ -52,7 +71,7 @@ def fitness(genome: Genome) -> int:
     value = agent.cheeseEaten + agent.trialTime - (len(genome.pArray) / 1000)
     genome.fitness = value
     print("fitness: ", value)
-    time.sleep(2)
+    
     return value # TODO: determine what genome length is too 'long'
 
     # more cheese eaten -> better
@@ -97,26 +116,26 @@ def canCross(index): # we made index -1 if there is no subtree
 
 def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     # recursively search behavior tree till find 
-    print("BEFORE CROSS")
-    display.render_dot_tree(a.tree, name="a_original")
-    display.render_dot_tree(b.tree, name="b_original")
-    time.sleep(3)
+    #print("BEFORE CROSS")
+    #display.render_dot_tree(a.tree, name="a_original")
+    #display.render_dot_tree(b.tree, name="b_original")
+    #time.sleep(3)
     point1, aIndex = find_point(a.tree)
     point2, bIndex = find_point(b.tree)
 
-    print("A: ", aIndex, " B: ", bIndex)
+    #print("A: ", aIndex, " B: ", bIndex)
     if not canCross(aIndex) and not canCross(bIndex): # No subtrees -> NO CHANGE
         print("1 woo")
     elif not canCross(aIndex) and canCross(bIndex):
         # a has no subtrees, b has subtrees
-        print("2 woo")
+       # print("2 woo")
         point2.children[bIndex] = deepcopy(point1) # A
     elif canCross(aIndex) and not canCross(bIndex):
-        print("3 woo")
+        #print("3 woo")
         point1.children[aIndex] = deepcopy(point2)
 
     else:
-        print("FINAL CASE REGULAR CROSS")
+        #print("FINAL CASE REGULAR CROSS")
         temp = point1.children[aIndex]
         point1.children[aIndex] = point2.children[bIndex] 
         point2.children[bIndex] = temp
@@ -124,7 +143,6 @@ def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     display.render_dot_tree(a.tree, name="a_cross")
     display.render_dot_tree(b.tree, name="b_cross")
     print("DONE CORSSING")
-    time.sleep(10)
     a.fitness = -1 # tree has been altered so fitness is no longer valid
     b.fitness = -1 # tree has been altered so fitness is no longer valid
     return a, b #hmm maybe a and b aren't the ones changed in rare scenarios
@@ -134,7 +152,6 @@ def mutation(tree, num:int = 1, probability:float = 0.5):
     if tree is None: #base case
         return 
     print("mutate")
-    time.sleep(3)
     if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
         if tree.children != []:
             for index, node in enumerate(tree.children):
@@ -189,28 +206,25 @@ def run_evolution(
             break
 
         next_generation = population[:2] # keep the top two genomes to avoid accidentally destroying them
-
+        delete_files_starting_with("best_one_generation")
+        name = "best one generation " + str(i)
+        display.render_dot_tree(next_generation[0].tree, name=name)
         # generate next pop. Each loop adds 2, and we already have two so it is length/2 - 1
         print("TIME TO MAKE NEXT GENERATION via mutation and crossover")
-        print("looping till j reaches this number", int(len(population)/2) - 1)
-        time.sleep(2)
         for j in range(int(len(population)/2) - 1):
-            print("INSIDE LOOP")
-            time.sleep(1)
+            print("INSIDE LOOP", j)
+            
             parents = selection_func(population, fitness_func) # two best
-            display.render_dot_tree(parents[0].tree, name="parent1")
-            display.render_dot_tree(parents[1].tree, name="parent2")
+            #display.render_dot_tree(parents[0].tree, name="parent1")
+            #display.render_dot_tree(parents[1].tree, name="parent2")
             offspring_a, offspring_b = crossover_func(deepcopy(parents[0]), deepcopy(parents[1])) # deep copy to avoid altering population
 
-            display.render_dot_tree(offspring_a.tree, name="original")
+            #display.render_dot_tree(offspring_a.tree, name="original")
             mutation_func(offspring_a.tree)
             offspring_a.fitness = -1
-            display.render_dot_tree(offspring_a.tree, name="mutated")
+            #display.render_dot_tree(offspring_a.tree, name="mutated")
             mutation_func(offspring_b.tree)
             offspring_b.fitness = -1
-            print("DONE MUTATING")
-            time.sleep(10)
-
             next_generation += [offspring_a, offspring_b]
 
         population = next_generation
