@@ -83,10 +83,10 @@ class Genome:
 
         if self.pArray is None:
             self.pArray = self.treeGenerator.array.convertToList()
-            print("ARRAY CREATED", self.pArray)
+            #print("ARRAY CREATED", self.pArray)
 
         display.render_dot_tree(self.tree, name="behavior_tree")
-        print(self.bb is not None)
+        #print(self.bb is not None)
 
         BT = BehaviorTree(self.bb, self.tree)
         try:

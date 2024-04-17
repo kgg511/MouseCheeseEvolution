@@ -17,6 +17,7 @@ from copy import deepcopy
 import sys
 import py_trees.display as display
 import os
+import threading
 
 Population = List[Genome]
 FitnessFunc = Callable[[Genome], int] # how good genome is
@@ -63,6 +64,7 @@ def generate_population(size:int, genome_length: int)-> Population: # originally
     return [generate_genome(genome_length) for _ in range(size)] # list of lists
 
 def fitness(genome: Genome) -> int:
+    print(f"Thread: {threading.current_thread().name}")
     genome.run_tree()
     assert genome.bb is not None
     agent = genome.bb.get("agent") # agent of THIS behavior tree
@@ -72,30 +74,16 @@ def fitness(genome: Genome) -> int:
     value = agent.cheeseEaten + agent.trialTime - (len(genome.pArray) / 1000)
     genome.fitness = value
     print("fitness: ", value)
-    
-    return value # TODO: determine what genome length is too 'long'
-
+    return value # used sometimes, but not always
     # more cheese eaten -> better
     # longer time alive -> better
     # shorter genome -> better (no need to overcomplicate)
 
-# choose two best from population
+# choose two best from population 
 def selection_pair(population: Population, fitness_func: FitnessFunc) -> Population:
-    the_weights = [fitness_func(genome) for genome in population] # fitness values
-    the_weights = sorted(the_weights, reverse=True) # biggest to smallest
-
-    with open("fitness_values.txt", "a") as f:
-        for weight in the_weights:
-            f.write(str(round(weight, 4)) + ", ")
-        f.write("\n")
-
-    if all(weight == 0 for weight in the_weights):
-        # If all weights are zero, assign a default weight
-        default_weight = 1
-        weights = [default_weight] * len(population)
     return choices(
         population=population,
-        weights=the_weights, # fitness values
+        weights=[genome.fitness for genome in population] , # fitness values
         k=2
     )
 
@@ -124,10 +112,6 @@ def canCross(index): # we made index -1 if there is no subtree
 
 def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     # recursively search behavior tree till find 
-    #print("BEFORE CROSS")
-    #display.render_dot_tree(a.tree, name="a_original")
-    #display.render_dot_tree(b.tree, name="b_original")
-    #time.sleep(3)
     point1, aIndex = find_point(a.tree)
     point2, bIndex = find_point(b.tree)
 
@@ -187,6 +171,12 @@ def mutation(tree, num:int = 1, probability:float = 0.5):
                         elif type == "firecond":   
                             tree.children[index] = CondFire(direction, None)
 
+def write_fitness_to_file(population):
+    with open("fitness_values.txt", "a") as f:
+        for genome in population:
+            f.write(str(round(genome.fitness, 4)) + ", ")
+        f.write("\n")
+
 def run_evolution(
         populate_func: PopulateFunc,
         fitness_func: FitnessFunc,
@@ -209,8 +199,25 @@ def run_evolution(
     #then once we are done with all generations, we sort the population by fitness
     for i in range(generation_limit):
         print("generation: ", i)
-        population = sorted(population, key=lambda genome: fitness_func(genome), reverse=True) # sort by fitness
+
         
+        threads = []
+        print("entering parallel section")
+        time.sleep(3)
+        for genome in population:
+            if genome.fitness == -1: # if fitness is not already calculated
+                t = threading.Thread(target=fitness_func, args=(genome,))
+                threads.append(t)
+                t.start()
+            else:
+                fitness_func(genome)
+        
+        for t in threads: #make sure all threads have finished execution before continuing 
+            t.join()
+        
+        # fitness should be all be set now
+        population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
+        write_fitness_to_file(population)
         # check if top genomes have reached limit aka success
         if fitness_func(population[0]) >= fitness_limit:
             break

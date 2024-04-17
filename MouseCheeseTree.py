@@ -14,7 +14,6 @@ time_trial = 10
 
 class CSequence(py_trees.composites.Sequence):
     def __init__(self, name=None, memory=False, children=None):
-        print("initailized w", name, memory, children)
         # Call the __init__() method of the base class with the required arguments
         super().__init__(name=name, memory=memory, children=children)
     def remove_parent(self):
@@ -46,7 +45,6 @@ class Node(py_trees.behaviour.Behaviour):
         self.blackboard = blackboard
         self.parent = None  # Parent node
     def checkTime(self):
-        print("get agent")
         agent = self.blackboard.get("agent")
         timePassed = time.time() - agent.timeStart
         if not agent.dead and timePassed > time_trial:
@@ -73,8 +71,8 @@ class Cond(Node): # look for cheese/fire left/right/up/down
         self.checkTime()
         agent = self.blackboard.get("agent")
         gridObject = self.blackboard.get("g")
-        print(f"Checking {self.direction} for {self.lookFor}")
-        gridObject.printGrid()
+        #print(f"Checking {self.direction} for {self.lookFor}")
+        #gridObject.printGrid()
         
         #time.sleep(2)
 
@@ -136,8 +134,8 @@ class Move(Node):
         if agent.dead:
             return py_trees.common.Status.FAILURE
 
-        print(f"Moved {self.direction}")
-        gridObject.printGrid()
+        #print(f"Moved {self.direction}")
+        #gridObject.printGrid()
         
         #time.sleep(2)
         return py_trees.common.Status.SUCCESS    
