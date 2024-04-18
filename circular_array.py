@@ -1,7 +1,5 @@
 from collections import deque
 
-# circular array -> Genome
-# structure CANNOT be changed after length is set
 class CircularArray:
     def __init__(self, items):
         self.circular_array = deque(maxlen=len(items))

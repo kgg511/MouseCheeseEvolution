@@ -13,9 +13,10 @@ from copy import deepcopy
 time_trial = 10
 
 class CSequence(py_trees.composites.Sequence):
-    def __init__(self, name=None, memory=False, children=None):
+    def __init__(self, name=None, memory=False, children=None, index=-1):
         # Call the __init__() method of the base class with the required arguments
         super().__init__(name=name, memory=memory, children=children)
+        self.index = index # index of genome used to make this
     def remove_parent(self):
         self.parent = None
     def __deepcopy__(self, memo):
@@ -27,9 +28,10 @@ class CSequence(py_trees.composites.Sequence):
         return new_instance
 
 class CSelector(py_trees.composites.Selector):
-    def __init__(self, name=None, memory=False, children=None):
+    def __init__(self, name=None, memory=False, children=None, index=-1):
         # Call the __init__() method of the base class with the required arguments
         super().__init__(name=name, memory=memory, children=children)
+        self.index = index # index of genome used to make this
     def remove_parent(self):
         self.parent = None
     def __deepcopy__(self, memo):
@@ -40,10 +42,11 @@ class CSelector(py_trees.composites.Selector):
         return new_instance
 
 class Node(py_trees.behaviour.Behaviour):
-    def __init__(self, name, blackboard):
+    def __init__(self, name, blackboard, index=-1):
         super().__init__(name)
         self.blackboard = blackboard
         self.parent = None  # Parent node
+        self.index = index # index of genome used to make this
     def checkTime(self):
         agent = self.blackboard.get("agent")
         timePassed = time.time() - agent.timeStart
@@ -62,8 +65,8 @@ class Node(py_trees.behaviour.Behaviour):
 # success if cheese in specified spot, else failure
 # also failure if mouse is dead
 class Cond(Node): # look for cheese/fire left/right/up/down
-    def __init__(self, name, direction, lookFor, blackboard):
-        super().__init__(name, blackboard) #f"Cheese {direction}?"
+    def __init__(self, name, direction, lookFor, blackboard, index=-1):
+        super().__init__(name, blackboard, index) #f"Cheese {direction}?"
         self.direction = direction # left, right, up, down
         self.blackboard = blackboard
         self.lookFor = lookFor # cheese, fire
@@ -106,22 +109,22 @@ class Cond(Node): # look for cheese/fire left/right/up/down
 
 # (self, name, direction, lookFor, blackboard)
 class CondCheese(Cond): 
-    def __init__(self, direction, blackboard):
-        super().__init__(f"Cheese {direction}?", direction, Cheese, blackboard)
+    def __init__(self, index, direction, blackboard):
+        super().__init__(f"Cheese {direction}?", direction, Cheese, blackboard, index)
     
     def __deepcopy__(self, memo):
         return self.__class__(self.direction, self.blackboard)
 
 class CondFire(Cond): 
-    def __init__(self, direction, blackboard):
-        super().__init__(f"Fire {direction}?", direction, Fire, blackboard)
+    def __init__(self, index, direction, blackboard):
+        super().__init__(f"Fire {direction}?", direction, Fire, blackboard, index)
     def __deepcopy__(self, memo):
         return self.__class__(self.direction, self.blackboard)
 
 # moves agent
 class Move(Node):
-    def __init__(self, direction, blackboard):
-        super().__init__(f"Move {direction}", blackboard)
+    def __init__(self, index, direction, blackboard):
+        super().__init__(f"Move {direction}", blackboard, index)
         self.direction = direction # left, right, up, down
         self.blackboard = blackboard
     def __deepcopy__(self, memo):

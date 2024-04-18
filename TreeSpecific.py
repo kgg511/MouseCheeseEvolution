@@ -24,40 +24,26 @@ class TreeGenerator:
     def __init__(self, c_list: CircularArray):
         self.array = c_list
         self.representationString = None
+        self.index = 0 # index we are in the genome, incremented each time we call get_element
 
     # Grammar rules
     def BT(self): 
         choice = self.array.get_element() % 2 # 0 or 1
+        self.index += 1
         if choice == 0:
             return self.SelectorString()
         else:
             return self.SequenceString()
 
     def SelectorString(self):
-        return "CSelector('Selector', memory=True, children=[" + self.Block() + "])"
+        return f"CSelector('Selector', memory=True, index={self.index-1}, children=[{self.Block()}])"
 
     def SequenceString(self):
-        return "CSequence('Sequence', memory=True, children=[" + self.Block() + "])"
-
-    #<Block> ::= <Element> | <Element> ',' <Block>
-    # def Block(self):
-    #     print("Block")
-    #     choice = self.array.get_element() % 2 
-    #     if choice == 0:
-    #         return self.Element()
-    #     else:
-    #         return self.Element() + "," + self.Block()
-
-    # def Element(self):
-    #     print("Element")
-    #     choice = self.array.get_element() % 2 # 0 - 3
-    #     if choice == 1:
-    #         return self.BT()
-    #     else:
-    #         return self.Leaf()
+        return f"CSequence('Sequence', memory=True, index={self.index-1}, children=[{self.Block()}])"
 
     def Block(self):
         choice = self.array.get_element() % 5
+        self.index += 1
         if choice == 0:
             return self.BT()
         elif choice == 1:
@@ -77,15 +63,17 @@ class TreeGenerator:
         # <Leaf> ::= CondCheese(direction, bb) | CondFire(direction, bb) | Move(direction, bb)
         # artificially make condition 1/3 and actio n2/3
         choice = self.array.get_element() % 6 # 0-5
+        self.index += 1
         if choice == 0:
-            return f"CondCheese('{self.DArguments()}', bb)"
+            return f"CondCheese(index={self.index-1}, '{self.DArguments()}', bb)"
         elif choice == 1:
-            return f"CondFire('{self.DArguments()}', bb)"
+            return f"CondFire(index={self.index-1}, '{self.DArguments()}', bb)"
         else: # 2-5 aka 2/3 chance
-            return f"Move('{self.DArguments()}', bb)"
+            return f"Move(index={self.index-1}, '{self.DArguments()}', bb)"
 
     def DArguments(self): 
         choice = self.array.get_element() % 4 # 0, 1, 2, 3
+        self.index += 1
         if choice == 0:
             return "left"
         elif choice == 1:
@@ -98,8 +86,8 @@ class TreeGenerator:
     # Generate a string using the grammar
     def generate_tree(self, bb):
         if self.representationString is None:
+            self.index = 0 # reset before making
             self.representationString = self.BT()
         
         print(self.representationString)
         return eval(self.representationString)
-
