@@ -177,66 +177,21 @@ def genome_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     
 def genome_mutate(a: Genome, num=1, probability=.5) -> Genome:
     print("mutate")
-    tree = a.tree
     array = a.pArray[:]
+    # sequence / selector take 1 number, move and cond take 2
+    def mutate(tree):
+        if random.random() < probability:
+            if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+                array[tree.index] = random.randint(0,9)
+            elif isinstance(tree, Node):
+                array[tree.index] = random.randint(0,9)
+                array[tree.index+1] = random.randint(0,9)
 
-    if random.random() < probability:
-        if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-            choice = random.choice([0,1]) # 0 or 1
-
-            if choice == 0:
-                a.pArray[tree.index] = 0# index of sequence
-            elif choice == 1:
-                a.pArray[tree.index] = 1# index of selector??????
-            
+        elif isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
             for child in tree.children:
-                mutation(child, num, probability)
-
-        elif isinstance(node, Node):
-            type = random.choice(["cheesecond", "firecond", "move"])
-            direction = random.choice(["left", "right", "up", "down"])
-            if type == "move":
-                tree.children[index] = Move(direction, None)
-            elif type == "cheesecond":
-                tree.children[index] = CondCheese(direction, None)
-            elif type == "firecond":   
-                tree.children[index] = CondFire(direction, None)
-
-
-
-
-    if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-        if tree.children != []:
-            for index, node in enumerate(tree.children):
-                if random.random() < probability: # mutate
-
-
-
-
-                    if isinstance(node, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-                        choice = random.choice([0,1]) # 0 or 1
-                        children = node.children
-                        for child in children: # the children must become orphans before reassigning them
-                            child.remove_parent()
-                        
-                        if choice == 0:
-                            tree.children[index] = py_trees.composites.Sequence("Sequence", memory=True, children=children)
-                        elif choice == 1:
-                            tree.children[index] = py_trees.composites.Selector("Selector", memory=True, children=children)
-                        
-                        mutation(node, num, probability)
-
-                    elif isinstance(node, Node):
-                        type = random.choice(["cheesecond", "firecond", "move"])
-                        direction = random.choice(["left", "right", "up", "down"])
-                        if type == "move":
-                            tree.children[index] = Move(direction, None)
-                        elif type == "cheesecond":
-                            tree.children[index] = CondCheese(direction, None)
-                        elif type == "firecond":   
-                            tree.children[index] = CondFire(direction, None)
-
-
+                mutate(child)
+    mutate(a.tree)
+    return Genome(CircularArray(array))
 
 def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     # recursively search behavior tree till find 
