@@ -107,14 +107,142 @@ def find_point(tree) -> Tuple[Union[py_trees.composites.Selector, py_trees.compo
         return tree, -1 
     return random.choice(options)
 
+def find_end_index(tree):
+    # given a tree, find the index stored within the last node
+    if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+        if tree.children != []:
+            return find_end_index(tree.children[-1])
+    elif isinstance(tree, Node):
+        # a terminal
+        return tree.index
+
 def canCross(index): # we made index -1 if there is no subtree
     return index != -1
+
+def genome_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
+    # crosses over two genomes by editing their genome sequence only
+    point1, aIndex = find_point(a.tree)
+    point2, bIndex = find_point(b.tree)
+
+    if not canCross(aIndex) and not canCross(bIndex): # No subtrees -> NO CHANGE
+        return a,b # no change so no need to create new genomes
+    elif not canCross(aIndex) and canCross(bIndex):
+        # b has subtrees, a doesn't
+        # a is put into b so create new genome for b
+        sectionForB = a.pArray[:]
+        bStartIndex = point2.children[bIndex].index
+        bEndIndex = find_end_index(point2.children[bIndex])
+
+        if len(b.pArray) == bEndIndex + 1:
+            newB = b.pArray[:bStartIndex] + sectionForB
+        else:
+            newB = b.pArray[:bStartIndex] + sectionForB + b.pArray[bEndIndex+1:]
+
+        return a, Genome(CircularArray(newB))
+
+    elif canCross(aIndex) and not canCross(bIndex):
+        # a has subtrees, b doesn't -> b is put into a
+        sectionForA = b.pArray[:]
+        aStartIndex = point1.children[aIndex].index
+        aEndIndex = find_end_index(point1.children[aIndex])
+
+        if len(a.pArray) == aEndIndex + 1:
+            newA = a.pArray[:aStartIndex] + sectionForA
+        else:
+            newA = a.pArray[:aStartIndex] + sectionForA + a.pArray[aEndIndex+1:]
+
+        return Genome(CircularArray(newA)), b
+
+    else:
+        aStartIndex = point1.children[aIndex].index
+        bStartIndex = point2.children[bIndex].index
+
+        aEndIndex = find_end_index(point1.children[aIndex])
+        bEndIndex = find_end_index(point2.children[bIndex])
+
+        sectionForB = a.pArray[aStartIndex:aEndIndex]
+        sectionForA = b.pArray[bStartIndex:bEndIndex] # represents a subtree
+
+        if len(b.pArray) == bEndIndex + 1:
+            newB = b.pArray[:bStartIndex] + sectionForB
+        else:
+            newB = b.pArray[:bStartIndex] + sectionForB + b.pArray[bEndIndex+1:]
+
+        if len(a.pArray) == aEndIndex + 1:
+            newA = a.pArray[:aStartIndex] + sectionForA
+        else:
+            newA = a.pArray[:aStartIndex] + sectionForA + a.pArray[aEndIndex+1:]
+
+        return Genome(CircularArray(newA)), Genome(CircularArray(newB))
+    
+def genome_mutate(a: Genome, num=1, probability=.5) -> Genome:
+    print("mutate")
+    tree = a.tree
+    array = a.pArray[:]
+
+    if random.random() < probability:
+        if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+            choice = random.choice([0,1]) # 0 or 1
+
+            if choice == 0:
+                a.pArray[tree.index] = 0# index of sequence
+            elif choice == 1:
+                a.pArray[tree.index] = 1# index of selector??????
+            
+            for child in tree.children:
+                mutation(child, num, probability)
+
+        elif isinstance(node, Node):
+            type = random.choice(["cheesecond", "firecond", "move"])
+            direction = random.choice(["left", "right", "up", "down"])
+            if type == "move":
+                tree.children[index] = Move(direction, None)
+            elif type == "cheesecond":
+                tree.children[index] = CondCheese(direction, None)
+            elif type == "firecond":   
+                tree.children[index] = CondFire(direction, None)
+
+
+
+
+    if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+        if tree.children != []:
+            for index, node in enumerate(tree.children):
+                if random.random() < probability: # mutate
+
+
+
+
+                    if isinstance(node, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+                        choice = random.choice([0,1]) # 0 or 1
+                        children = node.children
+                        for child in children: # the children must become orphans before reassigning them
+                            child.remove_parent()
+                        
+                        if choice == 0:
+                            tree.children[index] = py_trees.composites.Sequence("Sequence", memory=True, children=children)
+                        elif choice == 1:
+                            tree.children[index] = py_trees.composites.Selector("Selector", memory=True, children=children)
+                        
+                        mutation(node, num, probability)
+
+                    elif isinstance(node, Node):
+                        type = random.choice(["cheesecond", "firecond", "move"])
+                        direction = random.choice(["left", "right", "up", "down"])
+                        if type == "move":
+                            tree.children[index] = Move(direction, None)
+                        elif type == "cheesecond":
+                            tree.children[index] = CondCheese(direction, None)
+                        elif type == "firecond":   
+                            tree.children[index] = CondFire(direction, None)
+
+
 
 def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
     # recursively search behavior tree till find 
     point1, aIndex = find_point(a.tree)
     point2, bIndex = find_point(b.tree)
-
+    
     #print("A: ", aIndex, " B: ", bIndex)
     if not canCross(aIndex) and not canCross(bIndex): # No subtrees -> NO CHANGE
         print("1 woo")

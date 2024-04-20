@@ -8,5 +8,3 @@ def test_tree_index():
     generator = TreeGenerator(array)
     print(generator.BT())
 
-
-test_tree_index()

@@ -68,20 +68,14 @@ class TreeGenerator:
             return f"CondCheese(index={self.index-1}, '{self.DArguments()}', bb)"
         elif choice == 1:
             return f"CondFire(index={self.index-1}, '{self.DArguments()}', bb)"
-        else: # 2-5 aka 2/3 chance
-            return f"Move(index={self.index-1}, '{self.DArguments()}', bb)"
-
-    def DArguments(self): 
-        choice = self.array.get_element() % 4 # 0, 1, 2, 3
-        self.index += 1
-        if choice == 0:
-            return "left"
-        elif choice == 1:
-            return "right"
         elif choice == 2:
-            return "up"
-        else:
-            return "down"
+            return f"Move(index={self.index-1}, 'left', bb)"
+        elif choice == 3:
+            return f"Move(index={self.index-1}, 'right', bb)"
+        elif choice == 4:
+            return f"Move(index={self.index-1}, 'up', bb)"
+        elif choice == 5:
+            return f"Move(index={self.index-1}, 'down', bb)"
 
     # Generate a string using the grammar
     def generate_tree(self, bb):
