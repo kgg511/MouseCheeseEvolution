@@ -186,73 +186,72 @@ def genome_mutate(a: Genome, num=1, probability=.5) -> Genome:
             elif isinstance(tree, Node):
                 array[tree.index] = random.randint(0,9)
                 array[tree.index+1] = random.randint(0,9)
-
         elif isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
             for child in tree.children:
                 mutate(child)
     mutate(a.tree)
     return Genome(CircularArray(array))
 
-def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
-    # recursively search behavior tree till find 
-    point1, aIndex = find_point(a.tree)
-    point2, bIndex = find_point(b.tree)
+# def single_point_crossover(a: Genome, b: Genome) -> Tuple[Genome, Genome]:
+#     # recursively search behavior tree till find 
+#     point1, aIndex = find_point(a.tree)
+#     point2, bIndex = find_point(b.tree)
     
-    #print("A: ", aIndex, " B: ", bIndex)
-    if not canCross(aIndex) and not canCross(bIndex): # No subtrees -> NO CHANGE
-        print("1 woo")
-    elif not canCross(aIndex) and canCross(bIndex):
-        # a has no subtrees, b has subtrees
-       # print("2 woo")
-        point2.children[bIndex] = deepcopy(point1) # A
-    elif canCross(aIndex) and not canCross(bIndex):
-        #print("3 woo")
-        point1.children[aIndex] = deepcopy(point2)
+#     #print("A: ", aIndex, " B: ", bIndex)
+#     if not canCross(aIndex) and not canCross(bIndex): # No subtrees -> NO CHANGE
+#         print("1 woo")
+#     elif not canCross(aIndex) and canCross(bIndex):
+#         # a has no subtrees, b has subtrees
+#        # print("2 woo")
+#         point2.children[bIndex] = deepcopy(point1) # A
+#     elif canCross(aIndex) and not canCross(bIndex):
+#         #print("3 woo")
+#         point1.children[aIndex] = deepcopy(point2)
 
-    else:
-        #print("FINAL CASE REGULAR CROSS")
-        temp = point1.children[aIndex]
-        point1.children[aIndex] = point2.children[bIndex] 
-        point2.children[bIndex] = temp
+#     else:
+#         #print("FINAL CASE REGULAR CROSS")
+#         temp = point1.children[aIndex]
+#         point1.children[aIndex] = point2.children[bIndex] 
+#         point2.children[bIndex] = temp
     
-    # display.render_dot_tree(a.tree, name="a_cross")
-    # display.render_dot_tree(b.tree, name="b_cross")
-    print("DONE CORSSING")
-    a.fitness = -1 # tree has been altered so fitness is no longer valid
-    b.fitness = -1 # tree has been altered so fitness is no longer valid
-    return a, b #hmm maybe a and b aren't the ones changed in rare scenarios
+#     # display.render_dot_tree(a.tree, name="a_cross")
+#     # display.render_dot_tree(b.tree, name="b_cross")
+#     print("DONE CORSSING")
+#     a.fitness = -1 # tree has been altered so fitness is no longer valid
+#     b.fitness = -1 # tree has been altered so fitness is no longer valid
+#     return a, b #hmm maybe a and b aren't the ones changed in rare scenarios
 
-def mutation(tree, num:int = 1, probability:float = 0.5):
-    # recursively go through the tree and mutate children with probability
-    if tree is None: #base case
-        return 
-    print("mutate")
-    if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-        if tree.children != []:
-            for index, node in enumerate(tree.children):
-                if random.random() < probability: # mutate
-                    if isinstance(node, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-                        choice = random.choice([0,1]) # 0 or 1
-                        children = node.children
-                        for child in children: # the children must become orphans before reassigning them
-                            child.remove_parent()
+# def mutation(tree, num:int = 1, probability:float = 0.5):
+#     # recursively go through the tree and mutate children with probability
+#     if tree is None: #base case
+#         return 
+#     print("mutate")
+#     if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+#         if tree.children != []:
+#             for index, node in enumerate(tree.children):
+#                 if random.random() < probability: # mutate
+#                     if isinstance(node, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+#                         choice = random.choice([0,1]) # 0 or 1
+#                         children = node.children
+#                         for child in children: # the children must become orphans before reassigning them
+#                             child.remove_parent()
                         
-                        if choice == 0:
-                            tree.children[index] = py_trees.composites.Sequence("Sequence", memory=True, children=children)
-                        elif choice == 1:
-                            tree.children[index] = py_trees.composites.Selector("Selector", memory=True, children=children)
+#                         if choice == 0:
+#                             tree.children[index] = py_trees.composites.Sequence("Sequence", memory=True, children=children)
+#                         elif choice == 1:
+#                             tree.children[index] = py_trees.composites.Selector("Selector", memory=True, children=children)
                         
-                        mutation(node, num, probability)
+#                         mutation(node, num, probability)
 
-                    elif isinstance(node, Node):
-                        type = random.choice(["cheesecond", "firecond", "move"])
-                        direction = random.choice(["left", "right", "up", "down"])
-                        if type == "move":
-                            tree.children[index] = Move(direction, None)
-                        elif type == "cheesecond":
-                            tree.children[index] = CondCheese(direction, None)
-                        elif type == "firecond":   
-                            tree.children[index] = CondFire(direction, None)
+#                     elif isinstance(node, Node):
+#                         type = random.choice(["cheesecond", "firecond", "move"])
+#                         direction = random.choice(["left", "right", "up", "down"])
+#                         if type == "move":
+#                             tree.children[index] = Move(direction, None)
+#                         elif type == "cheesecond":
+#                             tree.children[index] = CondCheese(direction, None)
+#                         elif type == "firecond":   
+#                             tree.children[index] = CondFire(direction, None)
 
 def write_fitness_to_file(population):
     with open("fitness_values.txt", "a") as f:
@@ -265,8 +264,8 @@ def run_evolution(
         fitness_func: FitnessFunc,
         fitness_limit: int,
         selection_func: SelectionFunc = selection_pair,
-        crossover_func: CrossoverFunc = single_point_crossover,
-        mutation_func: MutationFunc = mutation,
+        crossover_func: CrossoverFunc = genome_crossover,
+        mutation_func: MutationFunc = genome_mutate,
         generation_limit: int = 100 # max amount of generations it will doo
     ) -> Tuple[Population, int]:
 
@@ -317,14 +316,18 @@ def run_evolution(
             parents = selection_func(population, fitness_func) # two best
             #display.render_dot_tree(parents[0].tree, name="parent1")
             #display.render_dot_tree(parents[1].tree, name="parent2")
-            offspring_a, offspring_b = crossover_func(deepcopy(parents[0]), deepcopy(parents[1])) # deep copy to avoid altering population
+            offspring_a, offspring_b = crossover_func(parents[0], parents[1])
+
+            if offspring_a.fitness == -1:
+                offspring_a.build_tree()
+            if offspring_b.fitness == -1:
+                offspring_b.build_tree()
+            print("tree built")
 
             #display.render_dot_tree(offspring_a.tree, name="original")
-            mutation_func(offspring_a.tree)
-            offspring_a.fitness = -1
+            offspring_a = mutation_func(offspring_a)
             #display.render_dot_tree(offspring_a.tree, name="mutated")
-            mutation_func(offspring_b.tree)
-            offspring_b.fitness = -1
+            offspring_b = mutation_func(offspring_b)
             next_generation += [offspring_a, offspring_b]
 
         population = next_generation

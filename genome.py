@@ -18,15 +18,12 @@ class Genome:
         self.tree = tree
         self.bb = bb
         self.pArray = None
-        if array is not None: # built first time using circular array
-            self.treeGenerator = TreeGenerator(array) # create behavior tree
-            
+        self.treeGenerator = TreeGenerator(array) # create behavior tree
 
     def __deepcopy__(self, memo):
         new_instance = self.__class__(tree=deepcopy(self.tree, memo), fitness=self.fitness)
         new_instance.treeGenerator = self.treeGenerator # NOT for rebuilding..just for reevaluating
         new_instance.pArray = self.pArray[:]
-        
         return new_instance
 
     def set_up(self):
@@ -65,13 +62,22 @@ class Genome:
         self.bb.set("agent", agent)
         self.bb.set("time_start_end", time.time()) # initialize with starting time
 
+    def build_tree(self):
+        # used for after crossover: rebuilds tree and sets pArray
+        # so that mutation is possible...
+        bbid = str(builtins.id(self)) # randomize namespce based on id
+        self.bb = py_trees.blackboard.Client(name=str(self.id), namespace=bbid) # dummy
+
+        self.tree = self.treeGenerator.generate_tree(self.bb)
+        self.pArray = self.treeGenerator.array.convertToList()
+
 
     def run_tree(self):
         #CASES:
         # 1. tree is None, fitness == -1, it has never been built before
         # 2. tree is not None, but fitness == -1, so it has been modified: Rerun tree, just don't generate again
         # 3. fitness != -1, it has been built, run & not modified since..return bb
-
+        print("running tree")
         if self.fitness != -1: # case 3: tree unchanged since last run
             assert self.bb != None
             print("no need to rerun tree, returning blackboard")
@@ -79,11 +85,8 @@ class Genome:
 
         self.set_up() # set up blackboard
         self.tree = self.treeGenerator.generate_tree(self.bb) #generate tree or update tree with proper bb
-        print("set up complete")
-
-        if self.pArray is None:
-            self.pArray = self.treeGenerator.array.convertToList()
-            #print("ARRAY CREATED", self.pArray)
+        self.pArray = self.treeGenerator.array.convertToList()
+        print("run_Tree: tree and pArray are set")
 
         display.render_dot_tree(self.tree, name="behavior_tree")
         #print(self.bb is not None)

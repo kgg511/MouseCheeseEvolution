@@ -65,11 +65,11 @@ class TreeGenerator:
         choice = self.array.get_element() % 6 # 0-5
         self.index += 1
         if choice == 0:
-            return f"CondCheese(index={self.index-1}, '{self.DArguments()}', bb)"
+            return f"CondCheese({self.index-1}, '{self.DArguments()}', bb)"
         elif choice == 1:
-            return f"CondFire(index={self.index-1}, '{self.DArguments()}', bb)"
+            return f"CondFire({self.index-1}, '{self.DArguments()}', bb)"
         else:
-            return f"Move(index={self.index-1}, '{self.DArguments()}', bb)"
+            return f"Move({self.index-1}, '{self.DArguments()}', bb)"
 
     def DArguments(self): 
         choice = self.array.get_element() % 4 # 0, 1, 2, 3
