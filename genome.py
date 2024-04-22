@@ -47,7 +47,6 @@ class Genome:
         # fill blackboard
         bbid = str(builtins.id(self)) # randomize namespce based on id
         self.bb = py_trees.blackboard.Client(name=str(self.id), namespace=bbid)
-        print("setting up foor namespace", bbid)
         
         self.bb.register_key(key="g", access=py_trees.common.Access.WRITE)
         self.bb.register_key(key="g", access=py_trees.common.Access.READ)
@@ -92,10 +91,6 @@ class Genome:
         self.set_up() # set up blackboard
         self.tree = self.treeGenerator.generate_tree(self.bb) #generate tree or update tree with proper bb
         self.pArray = self.treeGenerator.array.convertToList()
-        print("run_Tree: tree and pArray are set")
-
-        display.render_dot_tree(self.tree, name="behavior_tree")
-        #print(self.bb is not None)
 
         BT = BehaviorTree(self.bb, self.tree)
         try:

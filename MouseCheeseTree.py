@@ -10,7 +10,7 @@ from py_trees.common import Status
 from py_trees import logging as log_tree
 from typing import Callable as function
 from copy import deepcopy
-time_trial = 10
+time_trial = 3
 
 class CSequence(py_trees.composites.Sequence):
     def __init__(self, name=None, memory=False, children=None, index=-1):
@@ -137,10 +137,6 @@ class Move(Node):
         if agent.dead:
             return py_trees.common.Status.FAILURE
 
-        #print(f"Moved {self.direction}")
-        #gridObject.printGrid()
-        
-        #time.sleep(2)
         return py_trees.common.Status.SUCCESS    
     
     def move(self, agent):
@@ -152,6 +148,8 @@ class Move(Node):
             agent.move(agent.x, agent.y - 1)
         elif self.direction == "down" and agent.y + 1 < agent.grid.size:
             agent.move(agent.x, agent.y + 1)
+        
+        agent.increment_steps()
 
 class BehaviorTree():
     # contains all stuff we want to do with the tree

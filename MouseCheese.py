@@ -21,11 +21,15 @@ class Agent():
         self.cheeseEaten = 0
         self.dead = False
         self.grid = grid
+        self.steps = 0 # how many steps the agent has taken
         
         self.x = self.grid.size // 2
         self.y = self.grid.size // 2
         self.timeStart = time.time()
         self.trialTime = -1
+    
+    def increment_steps(self):
+        self.steps += 1
     
     def move(self, x, y): # move up, down, left, right randomly
         self.grid.grid[self.y][self.x] = None
@@ -37,7 +41,6 @@ class Agent():
             self.trialTime = time.time() - self.timeStart
         elif isinstance(self.grid.grid[self.y][self.x], Cheese):
             self.cheeseEaten += 1
-            print("yum")
         
         self.grid.grid[self.y][self.x] = self
         # put self in the grid

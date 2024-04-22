@@ -20,6 +20,7 @@ import os
 import threading
 import concurrent.futures
 
+GENERATION_SIZE = 10
 Population = List[Genome]
 FitnessFunc = Callable[[Genome], int] # how good genome is
 PopulateFunc = Callable[[], Population]
@@ -65,17 +66,16 @@ def fitness(genome: Genome) -> int:
         genome.run_tree()
         assert genome.bb is not None
         agent = genome.bb.get("agent") # agent of THIS behavior tree
-        print("cheese eaten: ", agent.cheeseEaten)
-        print("time: ", agent.trialTime)
-        print(len(genome.pArray))
-        value = agent.cheeseEaten + agent.trialTime - (len(genome.pArray) / 1000)
+        value = agent.cheeseEaten*1000 + agent.trialTime + (agent.steps/(agent.trialTime * 1000)) - (len(genome.pArray) / 1000)
         genome.fitness = value
+        print("cheese eaten:", agent.cheeseEaten, "time:", agent.trialTime, "steps:", agent.steps, "parray:", len(genome.pArray))
         print("fitness: ", value)
         return value # used sometimes, but not always
     except RecursionError:
-        print("oh no we have a recursion error")
-        # if the tree is too big its fitness is 0
-        return 0
+        print("running tree: oh no we have a recursion error")
+        # honestly we need to remove these ones
+        genome.fitness = 0
+        return genome.fitness
 
 # choose two best from population 
 def selection_pair(population: Population, fitness_func: FitnessFunc) -> Population:
@@ -100,7 +100,6 @@ def find_point(tree) -> Tuple[Union[py_trees.composites.Selector, py_trees.compo
         return candidates # empty list if no children or if root is not sequence/selector(shouldn't be possible)
     # randomly choose subtree
     options = find_subtrees(tree, [])
-    print("our options are: ", options)
     if options == []: #CASE: no subtrees
         return tree, -1 
     return random.choice(options)
@@ -208,18 +207,12 @@ def run_evolution(
 
     # Set a new recursion limit (e.g., 2000)
     sys.setrecursionlimit(2000)
-
     delete_file("fitness_values.txt")
 
     population = populate_func() # populate
-
-    # run i generations, each time keeping top two, but alsos selecting by weight other genomes
-    #doing cross over and mutation on them to create new genomes
-    #then once we are done with all generations, we sort the population by fitness
-    for i in range(generation_limit):
+    for i in range(generation_limit): # loop represents the creation of a new generation
         print("generation: ", i)
-
-        MAX_THREADS = 10
+        MAX_THREADS = GENERATION_SIZE
         # Create a ThreadPoolExecutor
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
             futures = [] # Create a list to store the futures
@@ -231,9 +224,15 @@ def run_evolution(
             # Wait for all tasks to complete
             concurrent.futures.wait(futures)
         
+        print("the parallel section is done")
+
+
         # fitness should be all be set now
         population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
         write_fitness_to_file(population)
+
+        population = [item for item in population if item.fitness != 0] # remove the trees that have recursion errors (too big)
+
         # check if top genomes have reached limit aka success
         if fitness_func(population[0]) >= fitness_limit:
             break
@@ -250,16 +249,13 @@ def run_evolution(
 
         # generate next pop. Each loop adds 2, and we already have two so it is length/2 - 1
         print("TIME TO MAKE NEXT GENERATION via mutation and crossover")
-        for j in range(int(len(population)/2) - 1):
+
+        j = 0
+        while j < int(GENERATION_SIZE/2) - 1:
             print("INSIDE LOOP", j)
-            
+            j+=1
             parents = selection_func(population, fitness_func) # two best
-            #display.render_dot_tree(parents[0].tree, name="parent1")
-            #display.render_dot_tree(parents[1].tree, name="parent2")
             offspring_a, offspring_b = crossover_func(parents[0], parents[1])
-
-            # if it's a new genome, buld its tree
-
             try:
                 if offspring_a.fitness == -1:
                     offspring_a.build_tree() 
@@ -267,7 +263,9 @@ def run_evolution(
                     offspring_b.build_tree()
                 print("tree built")
             except RecursionError:
-                print("built: oh no we have a recursion error")
+                print("build: oh no we have a recursion error")
+                # lets try again
+                j -= 1
                 continue
 
             #display.render_dot_tree(offspring_a.tree, name="original")
@@ -278,16 +276,16 @@ def run_evolution(
 
         population = next_generation
 
-    population = sorted(population, key=lambda genome: fitness_func(genome), reverse=True) # sort by fitness
+    population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
 
     return population, i
 
 genome_size = 200
 start = time.time()
 population,generation = run_evolution(
-    populate_func=partial(generate_population, size=10, genome_length=genome_size), #size:int, genome_length: int
+    populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
     fitness_func=fitness,
-    fitness_limit=100,
+    fitness_limit=1000000,
     generation_limit=200,
 )
 # generate_population(size:int, genome_length: int)
