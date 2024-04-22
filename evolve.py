@@ -18,6 +18,7 @@ import sys
 import py_trees.display as display
 import os
 import threading
+import concurrent.futures
 
 Population = List[Genome]
 FitnessFunc = Callable[[Genome], int] # how good genome is
@@ -218,20 +219,17 @@ def run_evolution(
     for i in range(generation_limit):
         print("generation: ", i)
 
-        
-        threads = []
-        print("entering parallel section")
-
-        for genome in population:
-            if genome.fitness == -1: # if fitness is not already calculated
-                t = threading.Thread(target=fitness_func, args=(genome,))
-                threads.append(t)
-                t.start()
-            else:
-                fitness_func(genome)
-        
-        for t in threads: #make sure all threads have finished execution before continuing 
-            t.join()
+        MAX_THREADS = 10
+        # Create a ThreadPoolExecutor
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+            futures = [] # Create a list to store the futures
+            for genome in population:
+                if genome.fitness == -1: # if fitness is not already calculated
+                    # Submit the task to the executor
+                    future = executor.submit(fitness_func, genome)
+                    futures.append(future) # Append the future object to the list
+            # Wait for all tasks to complete
+            concurrent.futures.wait(futures)
         
         # fitness should be all be set now
         population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
@@ -269,7 +267,7 @@ def run_evolution(
                     offspring_b.build_tree()
                 print("tree built")
             except RecursionError:
-                print("oh no we have a recursion error")
+                print("built: oh no we have a recursion error")
                 continue
 
             #display.render_dot_tree(offspring_a.tree, name="original")
