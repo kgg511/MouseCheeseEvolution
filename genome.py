@@ -68,8 +68,14 @@ class Genome:
         bbid = str(builtins.id(self)) # randomize namespce based on id
         self.bb = py_trees.blackboard.Client(name=str(self.id), namespace=bbid) # dummy
 
-        self.tree = self.treeGenerator.generate_tree(self.bb)
-        self.pArray = self.treeGenerator.array.convertToList()
+        try: 
+            self.tree = self.treeGenerator.generate_tree(self.bb)
+            self.pArray = self.treeGenerator.array.convertToList()
+        except RecursionError:
+            print("build tree recursion error:")
+            self.fitness = 0
+            self.pArray = [] 
+        
 
 
     def run_tree(self):

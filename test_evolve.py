@@ -10,13 +10,14 @@ import py_trees
 from py_trees.behaviour import Behaviour
 from py_trees.common import Status
 from MouseCheeseTree import *
-from evolve import find_point, mutation, single_point_crossover
+from evolve import find_point, genome_mutate, genome_crossover
 import py_trees.display as display
 from genome import Genome
+from circular_array import CircularArray
 
-subtree1 = CSelector("Selector", memory=True,children=[Move("left", None)])
-subtree2 = CSequence("Sequence", memory=True, children=[Move("right", None)])
-tree = CSequence("Sequence", memory=True, children=[subtree1, CondCheese("right", None), subtree2])
+# subtree1 = CSelector("Selector", memory=True,children=[Move("left", None)])
+# subtree2 = CSequence("Sequence", memory=True, children=[Move("right", None)])
+# tree = CSequence("Sequence", memory=True, children=[subtree1, CondCheese("right", None), subtree2])
 
 def test_find_point():
 #(self, direction, blackboard)
@@ -34,24 +35,29 @@ def test_copying_tree():
 def test_single_point_crossover():
     print("I A MRUNNIG THE TEST")
     # not sure how to write tests so currently just doing it visually
-    subtree1 = CSelector("Selector", memory=True,children=[Move("left", None)])
-    subtree2 = CSequence("Sequence", memory=True, children=[Move("right", None)])
-    a = CSequence("Sequence", memory=True, children=[subtree1, CondCheese("right", None), subtree2])
-    b = CSelector("Selector", memory=True,children=[Move("up", None), CondFire("right", None), Move("down", None)])
+    # subtree1 = CSelector("Selector", memory=True,children=[Move("left", None)])
+    # subtree2 = CSequence("Sequence", memory=True, children=[Move("right", None)])
+    # a = CSequence("Sequence", memory=True, children=[subtree1, CondCheese("right", None), subtree2])
+    # b = CSelector("Selector", memory=True,children=[Move("up", None), CondFire("right", None), Move("down", None)])
 
-    a = Genome(tree=a)
-    b = Genome(tree=b)
+
+    a = Genome(CircularArray([0,2,4,6,8,3,4]))
+    b = Genome(CircularArray([5,7,9,2,0]))
+    a.build_tree()
+    b.build_tree()
     display.render_dot_tree(a.tree, name="a_original")
     display.render_dot_tree(b.tree, name="b_original")
     
-    #newA, newB = single_point_crossover(a, b)
+    newA, newB = genome_crossover(a, b)
+    newA.build_tree()
+    newB.build_tree()
     
-    # display.render_dot_tree(newA.tree, name="a_cross")
-    # display.render_dot_tree(newB.tree, name="b_cross")
+    display.render_dot_tree(newA.tree, name="a_cross")
+    display.render_dot_tree(newB.tree, name="b_cross")
 
-def test_mutation():
-    display.render_dot_tree(tree, name="ORIGINAL")
-    mutation(tree)
-    display.render_dot_tree(tree, name="MUTATED")
+# def test_mutation():
+#     display.render_dot_tree(tree, name="ORIGINAL")
+#     mutation(tree)
+#     display.render_dot_tree(tree, name="MUTATED")
 
 test_single_point_crossover()
