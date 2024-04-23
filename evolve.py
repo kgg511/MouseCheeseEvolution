@@ -73,8 +73,7 @@ def fitness(genome: Genome) -> int:
         return value # used sometimes, but not always
     except RecursionError:
         print("running tree: oh no we have a recursion error")
-        # honestly we need to remove these ones
-        genome.fitness = 0
+        genome.fitness = 0 # get removed from the population
         return genome.fitness
 
 # choose two best from population 
@@ -95,8 +94,6 @@ def find_point(tree) -> Tuple[Union[py_trees.composites.Selector, py_trees.compo
                 for index, node in enumerate(tree.children):
                     if isinstance(node, (py_trees.composites.Sequence, py_trees.composites.Selector)):
                         candidates = find_subtrees(node, candidates + [(tree, index)])
-                    
-
         return candidates # empty list if no children or if root is not sequence/selector(shouldn't be possible)
     # randomly choose subtree
     options = find_subtrees(tree, [])
@@ -223,9 +220,7 @@ def run_evolution(
                     futures.append(future) # Append the future object to the list
             # Wait for all tasks to complete
             concurrent.futures.wait(futures)
-        
         print("the parallel section is done")
-
 
         # fitness should be all be set now
         population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
@@ -286,7 +281,7 @@ population,generation = run_evolution(
     populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
     fitness_func=fitness,
     fitness_limit=1000000,
-    generation_limit=200,
+    generation_limit=1000,
 )
 # generate_population(size:int, genome_length: int)
 end = time.time()

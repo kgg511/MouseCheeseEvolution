@@ -22,11 +22,10 @@ class Agent():
         self.dead = False
         self.grid = grid
         self.steps = 0 # how many steps the agent has taken
+        self.trialTime = 0 # how many time steps (running a action/condition node is +1)
         
         self.x = self.grid.size // 2
         self.y = self.grid.size // 2
-        self.timeStart = time.time()
-        self.trialTime = -1
     
     def increment_steps(self):
         self.steps += 1
@@ -38,7 +37,6 @@ class Agent():
 
         if isinstance(self.grid.grid[self.y][self.x], Fire):
             self.dead = True
-            self.trialTime = time.time() - self.timeStart
         elif isinstance(self.grid.grid[self.y][self.x], Cheese):
             self.cheeseEaten += 1
         

@@ -54,12 +54,8 @@ class Genome:
         self.bb.register_key(key="agent", access=py_trees.common.Access.WRITE)
         self.bb.register_key(key="agent", access=py_trees.common.Access.READ)
 
-        self.bb.register_key(key="time_start_end", access=py_trees.common.Access.WRITE)
-        self.bb.register_key(key="time_start_end", access=py_trees.common.Access.READ)
-
         self.bb.set("g", g)
         self.bb.set("agent", agent)
-        self.bb.set("time_start_end", time.time()) # initialize with starting time
 
     def build_tree(self):
         # used for after crossover: rebuilds tree and sets pArray
@@ -93,6 +89,7 @@ class Genome:
         self.pArray = self.treeGenerator.array.convertToList()
 
         BT = BehaviorTree(self.bb, self.tree)
+
         try:
             BT.tick_tree()
         except Exception as e: # TODO: create custom exception

@@ -10,7 +10,8 @@ from py_trees.common import Status
 from py_trees import logging as log_tree
 from typing import Callable as function
 from copy import deepcopy
-time_trial = 3
+time_trial = 100
+
 
 class CSequence(py_trees.composites.Sequence):
     def __init__(self, name=None, memory=False, children=None, index=-1):
@@ -47,11 +48,10 @@ class Node(py_trees.behaviour.Behaviour):
         self.blackboard = blackboard
         self.parent = None  # Parent node
         self.index = index # index of genome used to make this
-    def checkTime(self):
+    def update_and_check_time(self):
         agent = self.blackboard.get("agent")
-        timePassed = time.time() - agent.timeStart
-        if not agent.dead and timePassed > time_trial:
-            agent.trialTime = timePassed
+        agent.trialTime += 1
+        if not agent.dead and agent.trialTime >= time_trial:
             raise Exception("Time's up")
         elif agent.dead:
             raise Exception("Agent dead")
@@ -61,9 +61,6 @@ class Node(py_trees.behaviour.Behaviour):
 
 # Actions: move left, right, up, down
 #condtions: fire/cheese left/right/up/down
-
-# success if cheese in specified spot, else failure
-# also failure if mouse is dead
 class Cond(Node): # look for cheese/fire left/right/up/down
     def __init__(self, name, direction, lookFor, blackboard, index=-1):
         super().__init__(name, blackboard, index) #f"Cheese {direction}?"
@@ -71,19 +68,15 @@ class Cond(Node): # look for cheese/fire left/right/up/down
         self.blackboard = blackboard
         self.lookFor = lookFor # cheese, fire
     def update(self):
-        self.checkTime()
+        self.update_and_check_time()
         agent = self.blackboard.get("agent")
-        gridObject = self.blackboard.get("g")
         #print(f"Checking {self.direction} for {self.lookFor}")
         #gridObject.printGrid()
-        
         #time.sleep(2)
-
         if agent.dead:
             return py_trees.common.Status.FAILURE
         elif self.checkSpot(): # the item is there -> success
             return py_trees.common.Status.SUCCESS       
-        
         return py_trees.common.Status.FAILURE # not there
     
     def checkSpot(self):
@@ -130,13 +123,11 @@ class Move(Node):
     def __deepcopy__(self, memo):
         return self.__class__(self.direction, self.blackboard)
     def update(self):
-        self.checkTime()
+        self.update_and_check_time()
         agent = self.blackboard.get("agent")
-        gridObject = self.blackboard.get("g")
         self.move(agent)        
         if agent.dead:
             return py_trees.common.Status.FAILURE
-
         return py_trees.common.Status.SUCCESS    
     
     def move(self, agent):
@@ -148,13 +139,10 @@ class Move(Node):
             agent.move(agent.x, agent.y - 1)
         elif self.direction == "down" and agent.y + 1 < agent.grid.size:
             agent.move(agent.x, agent.y + 1)
-        
         agent.increment_steps()
 
 class BehaviorTree():
-    # contains all stuff we want to do with the tree
-    # create 2d grid of random Food() and None of size 10x10
-    # blackboard variable contains grid, agent
+    # built tree is passed into here to be run
     def __init__(self, blackboard, root):
         assert blackboard is not None
         self.blackboard = blackboard
@@ -164,12 +152,10 @@ class BehaviorTree():
         return py_trees.trees.BehaviourTree(root)
 
     def tick_tree(self):
-        # Tick the Behavior Tree to execute it
         for i in range(5):  # Repeat the sequence 5 times
             self.tree.tick_tock(
                 period_ms=5 # wait 5 ms between ticks 
             )
-            #self.blackboard.get("g").printGrid()
 
 
     
