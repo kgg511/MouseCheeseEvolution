@@ -17,6 +17,7 @@ from copy import deepcopy
 import sys
 import py_trees.display as display
 import os
+import shutil
 import threading
 import concurrent.futures
 
@@ -39,6 +40,14 @@ def delete_files_starting_with(prefix):
         if file.startswith(prefix):
             file_path = os.path.join(cwd, file)
             delete_file(file_path)
+
+def delete_files_ending_with(suffix):
+    cwd = os.getcwd()
+    files = os.listdir(cwd)
+    for file in files:
+        if file.endswith(suffix):
+            file_path = os.path.join(cwd, file)
+            os.remove(file_path)
 
 def delete_file(filename):
     try:
@@ -190,6 +199,20 @@ def write_fitness_to_file(population):
             f.write(str(round(genome.fitness, 4)) + ", ")
         f.write("\n")
 
+def clear_folder(name):
+    try:
+        # Iterate over all files and subdirectories in the directory
+        for item in os.listdir(name):
+            item_path = os.path.join(name, item)
+            if os.path.isfile(item_path):
+                os.remove(item_path)  # Remove file
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)  # Remove directory and its contents recursively
+        
+        print(f"Folder '{name}' successfully cleared.")
+    except OSError as e:
+        print(f"Error: {e.strerror}")
+
 def run_evolution(
         populate_func: PopulateFunc,
         fitness_func: FitnessFunc,
@@ -203,6 +226,8 @@ def run_evolution(
     # Set a new recursion limit (e.g., 2000)
     sys.setrecursionlimit(2000)
     delete_file("fitness_values.txt")
+    delete_files_starting_with("best")
+    clear_folder("results")
 
     population = populate_func() # populate
     for i in range(generation_limit): # loop represents the creation of a new generation
@@ -230,13 +255,21 @@ def run_evolution(
             break
 
         next_generation = population[:2] # keep the top two genomes to avoid accidentally destroying them
-        delete_files_starting_with("best_one_generation")
-        name = "best one generation " + str(i)
-        display.render_dot_tree(next_generation[0].tree, name=name)
 
-        delete_files_starting_with("3rd_best_one_generation")
-        name = "3rd best one generation " + str(i)
-        display.render_dot_tree(population[2].tree, name=name)
+        if i % 20 == 0:
+            name = "best_one_generation_" + str(i)
+            display.render_dot_tree(next_generation[0].tree, name=name)
+            new_path = os.path.join("results", name + ".png")
+            os.rename(name + ".png", new_path)
+
+            name = "3rd_best_one_generation_" + str(i)
+            display.render_dot_tree(next_generation[0].tree, name=name)
+            new_path = os.path.join("results", name + ".png")
+            os.rename(name + ".png", new_path)
+
+            delete_files_ending_with(".dot")
+            delete_files_ending_with(".svg")
+
         # generate next pop. Each loop adds 2, and we already have two so it is length/2 - 1
         print("TIME TO MAKE NEXT GENERATION via mutation and crossover")
         j = 0
@@ -254,7 +287,6 @@ def run_evolution(
                 print("build: oh no we have a recursion error")
                 # lets try again
                 j -= 1
-                print("YOU BETTER GO BACK UP TO THE TOP OF THE LOOP")
                 continue
 
             offspring_a = mutation_func(offspring_a)
@@ -262,7 +294,6 @@ def run_evolution(
             next_generation += [offspring_a, offspring_b]
 
         population = next_generation
-
     population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
 
     return population, i
