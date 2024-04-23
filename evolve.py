@@ -56,17 +56,15 @@ def generate_population(size:int, genome_length: int)-> Population: # originally
     return [generate_genome(genome_length) for _ in range(size)] # list of lists
 
 def fitness(genome: Genome) -> int:
-    print(f"Thread: {threading.current_thread().name}")
-    # more cheese eaten -> better
-    # longer time alive -> better
-    # shorter genome -> better (no need to overcomplicate)`
+    # more cheese eaten, more time alive, shorter genome -> better
     if genome.fitness != -1: # if fitness is already calculated
         return genome.fitness
     try:
         genome.run_tree()
         assert genome.bb is not None
-        agent = genome.bb.get("agent") # agent of THIS behavior tree
-        value = agent.cheeseEaten*1000 + agent.trialTime + (agent.steps/(agent.trialTime * 1000)) - (len(genome.pArray) / 1000)
+        agent = genome.bb.get("agent")
+        # .05 because staying alive counts for something
+        value = (.05 + agent.cheeseEaten/agent.totalCheese) * (agent.steps + agent.trialTime - (len(genome.pArray) / 1000))
         genome.fitness = value
         print("cheese eaten:", agent.cheeseEaten, "time:", agent.trialTime, "steps:", agent.steps, "parray:", len(genome.pArray))
         print("fitness: ", value)
@@ -220,7 +218,6 @@ def run_evolution(
                     futures.append(future) # Append the future object to the list
             # Wait for all tasks to complete
             concurrent.futures.wait(futures)
-        print("the parallel section is done")
 
         # fitness should be all be set now
         population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
@@ -240,11 +237,8 @@ def run_evolution(
         delete_files_starting_with("3rd_best_one_generation")
         name = "3rd best one generation " + str(i)
         display.render_dot_tree(population[2].tree, name=name)
-
-
         # generate next pop. Each loop adds 2, and we already have two so it is length/2 - 1
         print("TIME TO MAKE NEXT GENERATION via mutation and crossover")
-
         j = 0
         while j < int(GENERATION_SIZE/2) - 1:
             print("INSIDE LOOP", j)
@@ -256,16 +250,14 @@ def run_evolution(
                     offspring_a.build_tree() 
                 if offspring_b.fitness == -1:
                     offspring_b.build_tree()
-                print("tree built")
             except RecursionError:
                 print("build: oh no we have a recursion error")
                 # lets try again
                 j -= 1
+                print("YOU BETTER GO BACK UP TO THE TOP OF THE LOOP")
                 continue
 
-            #display.render_dot_tree(offspring_a.tree, name="original")
             offspring_a = mutation_func(offspring_a)
-            #display.render_dot_tree(offspring_a.tree, name="mutated")
             offspring_b = mutation_func(offspring_b)
             next_generation += [offspring_a, offspring_b]
 

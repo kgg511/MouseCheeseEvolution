@@ -27,7 +27,7 @@ class Genome:
         return new_instance
 
     def set_up(self):
-        size = 5
+        size = 10
 
         # create grid
         g = Grid(size)
@@ -40,8 +40,9 @@ class Genome:
             x = random.randint(0, size-1)
             y = random.randint(0, size-1)
             g.grid[x][y] = Cheese(x, y)
+            g.cheese += 1
 
-        agent = Agent(False, g)
+        agent = Agent(g)
         g.grid[agent.y][agent.x] = agent
 
         # fill blackboard
@@ -63,13 +64,8 @@ class Genome:
         bbid = str(builtins.id(self)) # randomize namespce based on id
         self.bb = py_trees.blackboard.Client(name=str(self.id), namespace=bbid) # dummy
 
-        try: 
-            self.tree = self.treeGenerator.generate_tree(self.bb)
-            self.pArray = self.treeGenerator.array.convertToList()
-        except RecursionError:
-            print("build tree recursion error:")
-            self.fitness = 0
-            self.pArray = [] 
+        self.tree = self.treeGenerator.generate_tree(self.bb)
+        self.pArray = self.treeGenerator.array.convertToList()
         
 
 
@@ -87,6 +83,10 @@ class Genome:
         self.set_up() # set up blackboard
         self.tree = self.treeGenerator.generate_tree(self.bb) #generate tree or update tree with proper bb
         self.pArray = self.treeGenerator.array.convertToList()
+        try:
+            assert self.pArray != []
+        except AssertionError:
+            print("pArray is empty after tree generation")
 
         BT = BehaviorTree(self.bb, self.tree)
 

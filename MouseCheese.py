@@ -17,8 +17,9 @@ class Fire(): # Kills mouse
 
 
 class Agent():
-    def __init__(self, dead, grid) -> None:
+    def __init__(self, grid) -> None:
         self.cheeseEaten = 0
+        self.totalCheese = grid.cheese
         self.dead = False
         self.grid = grid
         self.steps = 0 # how many steps the agent has taken
@@ -54,6 +55,7 @@ class Grid():
     def __init__(self, size) -> None:
         self.grid = []
         self.size = size
+        self.cheese = 0 # how many cheese in the grid at the start
 
     def printGrid(self):
         for i in range(self.size):
