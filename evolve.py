@@ -20,6 +20,7 @@ import os
 import shutil
 import threading
 import concurrent.futures
+import math
 
 GENERATION_SIZE = 10
 Population = List[Genome]
@@ -73,7 +74,12 @@ def fitness(genome: Genome) -> int:
         assert genome.bb is not None
         agent = genome.bb.get("agent")
         # .05 because staying alive counts for something
-        value = (.05 + agent.cheeseEaten/agent.totalCheese) * (agent.steps + agent.trialTime - (len(genome.pArray) / 1000))
+        #value = (.05 + agent.cheeseEaten/agent.totalCheese) * (agent.steps + agent.trialTime - (len(genome.pArray) / 1000))
+        value = (agent.cheeseEaten*10) + agent.steps + (2 * math.log(len(genome.pArray)+.0001)) # cheese eaten * 10 + steps + length of genome
+
+        if len(genome.pArray) > 1000: # penalize for being too long
+            value * .5
+        
         genome.fitness = value
         print("cheese eaten:", agent.cheeseEaten, "time:", agent.trialTime, "steps:", agent.steps, "parray:", len(genome.pArray))
         print("fitness: ", value)
@@ -85,11 +91,19 @@ def fitness(genome: Genome) -> int:
 
 # choose two best from population 
 def selection_pair(population: Population, fitness_func: FitnessFunc) -> Population:
-    return choices(
+    population = population[:] # working with a copy just in case
+    one = choices(
         population=population,
         weights=[genome.fitness for genome in population] , # fitness values
-        k=2
-    )
+    )[0]
+    population.remove(one)
+    two = choices(
+        population=population,
+        weights=[genome.fitness for genome in population] , # fitness values
+    )[0]
+    assert one != two
+
+    return one, two
 
 def find_point(tree) -> Tuple[Union[py_trees.composites.Selector, py_trees.composites.Sequence], int]:
     # find a point in the tree to do crossover (must be a selector or sequence)
@@ -262,8 +276,13 @@ def run_evolution(
             new_path = os.path.join("results", name + ".png")
             os.rename(name + ".png", new_path)
 
+            name = "2nd_best_one_generation_" + str(i)
+            display.render_dot_tree(next_generation[1].tree, name=name)
+            new_path = os.path.join("results", name + ".png")
+            os.rename(name + ".png", new_path)
+
             name = "3rd_best_one_generation_" + str(i)
-            display.render_dot_tree(next_generation[0].tree, name=name)
+            display.render_dot_tree(population[2].tree, name=name)
             new_path = os.path.join("results", name + ".png")
             os.rename(name + ".png", new_path)
 
