@@ -53,7 +53,7 @@ class TreeGenerator:
         return self.Block() + "," + self.Nodes()
 
     def Nodes(self):
-        choice = self.array.get_element() % 6 # 0-9
+        choice = self.array.get_element() % 8 # 0-9
         self.index += 1
 
         if choice == 0:
@@ -62,9 +62,9 @@ class TreeGenerator:
             return f"CondFire({self.index-1}, '{self.DArguments()}', bb)"
         elif choice in [2,3]:
             return f"Move({self.index-1}, '{self.DArguments()}', bb)"
-        elif choice == 4:
+        elif choice == 4 or choice == 5:
             return self.SelectorString()
-        elif choice == 5:
+        elif choice == 6 or choice == 7:
             return self.SequenceString()
         
 

@@ -109,28 +109,19 @@ def prune(a: Genome) -> Genome: # this function will actually alter...no you nee
     # locate parent w one child, pop parent from array
     a.tree.root = True
     def p(tree):
-        # A selector will always have a child 
-        
-
         if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
             print(tree.children)
             if len(tree.children) == 1 and (tree.root == False or isinstance(tree.children[0], (py_trees.composites.Sequence, py_trees.composites.Selector))): # we cannot remove root
-                
                 p(tree.children[0])
-                print("goodbyte parent with the number at ", tree.index)
                 print("deleting from index", tree.index, "to but not including", tree.children[0].index)
                 del array[tree.index:tree.children[0].index]
-
-                # tree.index is the starting index
-                # ending index is tree.children[0].index
-
-                
             else:
                 # is either the root (can't remove itself) or has more than one child
                 for child in tree.children:
                     p(child)
     p(a.tree)
-    print("New array", array)
+    if(array == a.pArray):
+        return a
     return Genome(CircularArray(array))
     # locate a parent with only one child, replace parent with child
 
@@ -299,7 +290,13 @@ def run_evolution(
 
         next_generation = population[:2] # keep the top two genomes to avoid accidentally destroying them
 
+
+        
         if i % 20 == 0:
+            next_generation = [prune(pop) for pop in next_generation]
+            next_generation[0].build_tree()
+            next_generation[1].build_tree()
+
             name = "best_one_generation_" + str(i)
             display.render_dot_tree(next_generation[0].tree, name=name)
             new_path = os.path.join("results", name + ".png")
@@ -326,6 +323,7 @@ def run_evolution(
             j+=1
             parents = selection_func(population, fitness_func) # two best
             offspring_a, offspring_b = crossover_func(parents[0], parents[1])
+            
             try:
                 if offspring_a.fitness == -1:
                     offspring_a.build_tree() 
@@ -348,14 +346,14 @@ def run_evolution(
 
 genome_size = 200
 start = time.time()
-# population,generation = run_evolution(
-#     populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
-#     fitness_func=fitness,
-#     fitness_limit=1000000,
-#     generation_limit=1000,
-# )
-# # generate_population(size:int, genome_length: int)
-# end = time.time()
+population,generation = run_evolution(
+    populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
+    fitness_func=fitness,
+    fitness_limit=1000000,
+    generation_limit=1000,
+)
+# generate_population(size:int, genome_length: int)
+end = time.time()
 
-# print("Generations: ", generation)
-# print("Time: ", end-start)
+print("Generations: ", generation)
+print("Time: ", end-start)
