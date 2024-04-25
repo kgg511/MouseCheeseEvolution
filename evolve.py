@@ -75,10 +75,9 @@ def fitness(genome: Genome) -> int:
         agent = genome.bb.get("agent")
         # .05 because staying alive counts for something
         #value = (.05 + agent.cheeseEaten/agent.totalCheese) * (agent.steps + agent.trialTime - (len(genome.pArray) / 1000))
-        value = (agent.cheeseEaten*10) + agent.steps + (2 * math.log(len(genome.pArray)+.0001)) # cheese eaten * 10 + steps + length of genome
-
-        if len(genome.pArray) > 1000: # penalize for being too long
-            value * .5
+        value = (agent.cheeseEaten*10) + (2 * math.log(len(genome.pArray)+.0001))
+        if len(genome.pArray) > 150: # penalize for being too long
+            value *= .5
         
         genome.fitness = value
         print("cheese eaten:", agent.cheeseEaten, "time:", agent.trialTime, "steps:", agent.steps, "parray:", len(genome.pArray))
@@ -88,7 +87,6 @@ def fitness(genome: Genome) -> int:
         print("running tree: oh no we have a recursion error")
         genome.fitness = 0 # get removed from the population
         return genome.fitness
-
 # choose two best from population 
 def selection_pair(population: Population, fitness_func: FitnessFunc) -> Population:
     population = population[:] # working with a copy just in case
@@ -104,6 +102,29 @@ def selection_pair(population: Population, fitness_func: FitnessFunc) -> Populat
     assert one != two
 
     return one, two
+
+
+def prune(a: Genome) -> Genome: # this function will actually alter...no you need to alter genome though
+    array = a.pArray[:]
+    # locate parent w one child, pop parent from array
+    def p(tree):
+        if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
+            if len(tree.children) == 1 and tree.root == False: # we cannot remove root
+                print("goodbyte parent with the number at ", tree.index)
+                print("deleting from index", tree.index, "to but not including", tree.children[0].index)
+                #del array[tree.index:tree.children[0].index]
+
+                # tree.index is the starting index
+                # ending index is tree.children[0].index
+
+                
+            else:
+                for child in tree.children:
+                    p(child)
+    p(a.tree)
+    print("New array", array)
+    return Genome(CircularArray(array))
+    # locate a parent with only one child, replace parent with child
 
 def find_point(tree) -> Tuple[Union[py_trees.composites.Selector, py_trees.composites.Sequence], int]:
     # find a point in the tree to do crossover (must be a selector or sequence)
@@ -319,14 +340,14 @@ def run_evolution(
 
 genome_size = 200
 start = time.time()
-population,generation = run_evolution(
-    populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
-    fitness_func=fitness,
-    fitness_limit=1000000,
-    generation_limit=1000,
-)
-# generate_population(size:int, genome_length: int)
-end = time.time()
+# population,generation = run_evolution(
+#     populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
+#     fitness_func=fitness,
+#     fitness_limit=1000000,
+#     generation_limit=1000,
+# )
+# # generate_population(size:int, genome_length: int)
+# end = time.time()
 
-print("Generations: ", generation)
-print("Time: ", end-start)
+# print("Generations: ", generation)
+# print("Time: ", end-start)

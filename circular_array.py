@@ -27,7 +27,8 @@ class CircularArray:
         if len(self.circular_array) == 0:
             print("Circular array is empty")
         else:
+            value = self.circular_array[self.current_index]
             next_index = (self.current_index + 1) % len(self.circular_array) 
             self.current_index = next_index
             self.length += 1
-            return self.circular_array[next_index]
+            return value

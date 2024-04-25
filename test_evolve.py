@@ -1,6 +1,4 @@
 import pytest
-
-
 from typing import List, Tuple
 from random import choices, randint, randrange, random
 import py_trees.display as display
@@ -10,7 +8,7 @@ import py_trees
 from py_trees.behaviour import Behaviour
 from py_trees.common import Status
 from MouseCheeseTree import *
-from evolve import find_point, genome_mutate, genome_crossover
+from evolve import find_point, genome_mutate, genome_crossover, prune
 import py_trees.display as display
 from genome import Genome
 from circular_array import CircularArray
@@ -30,9 +28,23 @@ def test_copying_tree():
     tree2 = deepcopy(b)
     display.render_dot_tree(b, name="a_original")
     display.render_dot_tree(tree2, name="a_cross")
-    
 
-def test_single_point_crossover():
+
+def test_prune():
+    array = CircularArray([6,2,1,5,7,8,5,4]) # a tree with some unnecessary stuff
+    a = Genome(array)
+
+    a.build_tree()
+    print("original", a.pArray)
+    display.render_dot_tree(a.tree, name="a_original")
+
+    a = prune(a) # alter a genome
+    print(a.pArray)
+    a.build_tree()
+    display.render_dot_tree(a.tree, name="a_pruned")
+test_prune() 
+
+def t_single_point_crossover():
     print("I A MRUNNIG THE TEST")
     # not sure how to write tests so currently just doing it visually
     # subtree1 = CSelector("Selector", memory=True,children=[Move("left", None)])
@@ -59,5 +71,3 @@ def test_single_point_crossover():
 #     display.render_dot_tree(tree, name="ORIGINAL")
 #     mutation(tree)
 #     display.render_dot_tree(tree, name="MUTATED")
-
-test_single_point_crossover()

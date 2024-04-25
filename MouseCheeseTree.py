@@ -14,10 +14,11 @@ time_trial = 100
 
 
 class CSequence(py_trees.composites.Sequence):
-    def __init__(self, name=None, memory=False, children=None, index=-1):
+    def __init__(self, name=None, memory=False, children=None, index=-1, root=False):
         # Call the __init__() method of the base class with the required arguments
         super().__init__(name=name, memory=memory, children=children)
         self.index = index # index of genome used to make this
+        self.root = root
     def remove_parent(self):
         self.parent = None
     def __deepcopy__(self, memo):
@@ -29,10 +30,11 @@ class CSequence(py_trees.composites.Sequence):
         return new_instance
 
 class CSelector(py_trees.composites.Selector):
-    def __init__(self, name=None, memory=False, children=None, index=-1):
+    def __init__(self, name=None, memory=False, children=None, index=-1, root=False):
         # Call the __init__() method of the base class with the required arguments
         super().__init__(name=name, memory=memory, children=children)
         self.index = index # index of genome used to make this
+        self.root = root
     def remove_parent(self):
         self.parent = None
     def __deepcopy__(self, memo):

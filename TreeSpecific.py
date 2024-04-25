@@ -88,5 +88,6 @@ class TreeGenerator:
         if self.representationString is None:
             self.index = 0 # reset before making
             self.representationString = self.BT()
+            print(self.representationString)
         
         return eval(self.representationString)
