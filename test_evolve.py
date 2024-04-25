@@ -31,7 +31,7 @@ def test_copying_tree():
 
 
 def test_prune():
-    array = CircularArray([6,2,1,5,7,8,5,4]) # a tree with some unnecessary stuff
+    array = CircularArray([2,1,5,7,6,5]) # a tree with some unnecessary stuff
     a = Genome(array)
 
     a.build_tree()

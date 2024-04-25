@@ -107,12 +107,13 @@ def selection_pair(population: Population, fitness_func: FitnessFunc) -> Populat
 def prune(a: Genome) -> Genome: # this function will actually alter...no you need to alter genome though
     array = a.pArray[:]
     # locate parent w one child, pop parent from array
+    a.tree.root = True
     def p(tree):
         if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
             if len(tree.children) == 1 and tree.root == False: # we cannot remove root
                 print("goodbyte parent with the number at ", tree.index)
                 print("deleting from index", tree.index, "to but not including", tree.children[0].index)
-                #del array[tree.index:tree.children[0].index]
+                del array[tree.index:tree.children[0].index]
 
                 # tree.index is the starting index
                 # ending index is tree.children[0].index
