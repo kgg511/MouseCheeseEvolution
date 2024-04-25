@@ -31,7 +31,11 @@ def test_copying_tree():
 
 
 def test_prune():
-    array = CircularArray([2,1,5,7,6,5]) # a tree with some unnecessary stuff
+    array = CircularArray([2,1,5,7,6,5]) # a tree with an extra sequence and a child of a conditional
+
+    array = CircularArray([2,1,5,7,4,5,8,4,2,0,7,5,4,33]) # 
+
+    array = CircularArray([3,2,5,4,6,7,7,2,5,9,5,2,1,4,7,8,6])
     a = Genome(array)
 
     a.build_tree()
@@ -42,6 +46,9 @@ def test_prune():
     print(a.pArray)
     a.build_tree()
     display.render_dot_tree(a.tree, name="a_pruned")
+
+
+    
 test_prune() 
 
 def t_single_point_crossover():

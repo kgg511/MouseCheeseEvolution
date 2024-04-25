@@ -109,8 +109,14 @@ def prune(a: Genome) -> Genome: # this function will actually alter...no you nee
     # locate parent w one child, pop parent from array
     a.tree.root = True
     def p(tree):
+        # A selector will always have a child 
+        
+
         if isinstance(tree, (py_trees.composites.Sequence, py_trees.composites.Selector)):
-            if len(tree.children) == 1 and tree.root == False: # we cannot remove root
+            print(tree.children)
+            if len(tree.children) == 1 and (tree.root == False or isinstance(tree.children[0], (py_trees.composites.Sequence, py_trees.composites.Selector))): # we cannot remove root
+                
+                p(tree.children[0])
                 print("goodbyte parent with the number at ", tree.index)
                 print("deleting from index", tree.index, "to but not including", tree.children[0].index)
                 del array[tree.index:tree.children[0].index]
@@ -120,6 +126,7 @@ def prune(a: Genome) -> Genome: # this function will actually alter...no you nee
 
                 
             else:
+                # is either the root (can't remove itself) or has more than one child
                 for child in tree.children:
                     p(child)
     p(a.tree)
