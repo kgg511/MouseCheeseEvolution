@@ -233,6 +233,14 @@ def write_fitness_to_file(population):
             f.write(str(round(genome.fitness, 4)) + ", ")
         f.write("\n")
 
+def write_genomes_to_file(population):
+    with open("genomes.txt", "a") as f:
+        result = ""
+        for i in range(3):
+            result += "".join(str(item) for item in population[i].pArray) 
+            result+= ","
+        f.write(result + "\n")
+
 def clear_folder(name):
     try:
         # Iterate over all files and subdirectories in the directory
@@ -260,6 +268,7 @@ def run_evolution(
     # Set a new recursion limit (e.g., 2000)
     sys.setrecursionlimit(2000)
     delete_file("fitness_values.txt")
+    delete_file("genomes.txt")
     delete_files_starting_with("best")
     clear_folder("results")
 
@@ -281,17 +290,16 @@ def run_evolution(
         # fitness should be all be set now
         population = sorted(population, key=lambda genome: genome.fitness, reverse=True) # sort by fitness
         write_fitness_to_file(population)
+        
 
         population = [item for item in population if item.fitness != 0] # remove the trees that have recursion errors (too big)
-
+        write_genomes_to_file(population)
         # check if top genomes have reached limit aka success
         if fitness_func(population[0]) >= fitness_limit:
             break
 
         next_generation = population[:2] # keep the top two genomes to avoid accidentally destroying them
 
-
-        
         if i % 20 == 0:
             next_generation = [prune(pop) for pop in next_generation]
             next_generation[0].build_tree()
@@ -346,14 +354,14 @@ def run_evolution(
 
 genome_size = 200
 start = time.time()
-population,generation = run_evolution(
-    populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
-    fitness_func=fitness,
-    fitness_limit=1000000,
-    generation_limit=1000,
-)
-# generate_population(size:int, genome_length: int)
-end = time.time()
+# population,generation = run_evolution(
+#     populate_func=partial(generate_population, size=GENERATION_SIZE, genome_length=genome_size), #size:int, genome_length: int
+#     fitness_func=fitness,
+#     fitness_limit=1000000,
+#     generation_limit=1000,
+# )
+# # generate_population(size:int, genome_length: int)
+# end = time.time()
 
-print("Generations: ", generation)
-print("Time: ", end-start)
+# print("Generations: ", generation)
+# print("Time: ", end-start)

@@ -35,7 +35,13 @@ def test_prune():
 
     array = CircularArray([2,1,5,7,4,5,8,4,2,0,7,5,4,33]) # 
 
-    array = CircularArray([3,2,5,4,6,7,7,2,5,9,5,2,1,4,7,8,6])
+    array = CircularArray([3,2,5,4,6,7,7,2,5,9,5,2,1,4,7,8,6]) 
+
+    array = CircularArray([3,5,4,3,2,5,1,1,9])
+    
+    array = CircularArray([7,5,4,3,2,4,4,5,4,4,4,5,4,3,2])
+
+    array = CircularArray([int(thing) for thing in "7665507543266049864667543256746655075432660498"])
     a = Genome(array)
 
     a.build_tree()
